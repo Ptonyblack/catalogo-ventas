@@ -1,0 +1,138 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Puré de Tomate",
+      "category": "purees",
+      "description": "Puré de tomate casero, 100% natural sin conservantes",
+      "imageUrl": "https://via.placeholder.com/300x300?text=Puré+Tomate",
+      "priceUSD": 5.99,
+      "priceCUP": 150,
+      "available": true,
+      "boxesAvailable": 25,
+      "unitsPerBox": 6,
+      "totalUnits": 150
+    },
+    {
+      "id": 2,
+      "name": "Puré de Mango",
+      "category": "purees",
+      "description": "Puré tropical de mango fresco y dulce",
+      "imageUrl": "https://via.placeholder.com/300x300?text=Puré+Mango",
+      "priceUSD": 6.99,
+      "priceCUP": 175,
+      "available": true,
+      "boxesAvailable": 20,
+      "unitsPerBox": 8,
+      "totalUnits": 160
+    },
+    {
+      "id": 3,
+      "name": "Puré de Guayaba",
+      "category": "purees",
+      "description": "Auténtico puré de guayaba cubana",
+      "imageUrl": "https://via.placeholder.com/300x300?text=Puré+Guayaba",
+      "priceUSD": 6.50,
+      "priceCUP": 165,
+      "available": false,
+      "boxesAvailable": 0,
+      "unitsPerBox": 6,
+      "totalUnits": 0
+    },
+    {
+      "id": 4,
+      "name": "Vinagre Tradicional",
+      "category": "vinegars",
+      "description": "Vinagre de caña tradicional, añejado 6 meses",
+      "imageUrl": "https://via.placeholder.com/300x300?text=Vinagre+Tradicional",
+      "priceUSD": 7.99,
+      "priceCUP": 200,
+      "available": true,
+      "boxesAvailable": 30,
+      "unitsPerBox": 12,
+      "totalUnits": 360
+    },
+    {
+      "id": 5,
+      "name": "Vinagre Aromático",
+      "category": "vinegars",
+      "description": "Vinagre infusionado con hierbas aromáticas",
+      "imageUrl": "https://via.placeholder.com/300x300?text=Vinagre+Aromático",
+      "priceUSD": 8.99,
+      "priceCUP": 225,
+      "available": true,
+      "boxesAvailable": 18,
+      "unitsPerBox": 12,
+      "totalUnits": 216
+    },
+    {
+      "id": 6,
+      "name": "Vinagre Balsámico",
+      "category": "vinegars",
+      "description": "Vinagre balsámico envejecido, sabor premium",
+      "imageUrl": "https://via.placeholder.com/300x300?text=Vinagre+Balsámico",
+      "priceUSD": 12.50,
+      "priceCUP": 315,
+      "available": true,
+      "boxesAvailable": 12,
+      "unitsPerBox": 8,
+      "totalUnits": 96
+    },
+    {
+      "id": 7,
+      "name": "Conserva de Pimiento",
+      "category": "others",
+      "description": "Pimientos rojos asados en aceite de oliva",
+      "imageUrl": "https://via.placeholder.com/300x300?text=Conserva+Pimiento",
+      "priceUSD": 9.99,
+      "priceCUP": 250,
+      "available": true,
+      "boxesAvailable": 15,
+      "unitsPerBox": 12,
+      "totalUnits": 180
+    },
+    {
+      "id": 8,
+      "name": "Salsa Criolla",
+      "category": "others",
+      "description": "Salsa cubana tradicional con toque casero",
+      "imageUrl": "https://via.placeholder.com/300x300?text=Salsa+Criolla",
+      "priceUSD": 8.50,
+      "priceCUP": 215,
+      "available": true,
+      "boxesAvailable": 22,
+      "unitsPerBox": 12,
+      "totalUnits": 264
+    },
+    {
+      "id": 9,
+      "name": "Mermelada de Frutas",
+      "category": "others",
+      "description": "Mermelada artesanal de frutas tropicales",
+      "imageUrl": "https://via.placeholder.com/300x300?text=Mermelada+Frutas",
+      "priceUSD": 7.50,
+      "priceCUP": 190,
+      "available": false,
+      "boxesAvailable": 0,
+      "unitsPerBox": 12,
+      "totalUnits": 0
+    }
+  ],
+  "categories": [
+    {
+      "id": "purees",
+      "name": "Purés",
+      "icon": ""
+    },
+    {
+      "id": "vinegars",
+      "name": "Vinagres",
+      "icon": ""
+    },
+    {
+      "id": "others",
+      "name": "Otros Productos",
+      "icon": ""
+    }
+  ]
+}
