@@ -10,7 +10,30 @@
 </head>
 <body>
 
-  <div class="admin-container">
+  <!-- MODAL DE LOGIN -->
+  <div id="loginModal" class="login-modal">
+    <div class="login-container">
+      <h1>🔐 Panel Administrativo</h1>
+      <p>Ingresa tu contraseña para acceder</p>
+      <form onsubmit="validateLogin(event)">
+        <div class="form-group">
+          <label for="adminPassword">Usuario:</label>
+          <input type="text" id="adminUser" value="tonyblack" readonly style="background: #f0f0f0; cursor: not-allowed;">
+        </div>
+        <div class="form-group">
+          <label for="adminPassword">Contraseña:</label>
+          <input type="password" id="adminPassword" placeholder="Ingresa tu contraseña" required autofocus>
+        </div>
+        <button type="submit" class="login-btn">Acceder</button>
+        <div id="loginError" class="login-error"></div>
+      </form>
+      <p style="text-align: center; margin-top: 20px; font-size: 12px; color: #999;">
+        <a href="index.html" style="color: #666; text-decoration: none;">← Volver al sitio</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="admin-container" style="display: none;" id="adminContent">
     <!-- SIDEBAR -->
     <aside class="sidebar">
       <div class="sidebar-header">
@@ -334,6 +357,85 @@
       if (storeName) document.getElementById('storeName').value = storeName;
       if (storeLocation) document.getElementById('storeLocation').value = storeLocation;
     });
+
+    // ==================== SISTEMA DE LOGIN ====================
+    const ADMIN_PASSWORD_HASH = '602bdc76622ae4aaff418ae58e80aa247f30e4710ca31cfe1ae64dff6df50aba';
+    const SESSION_KEY = 'admin_session_auth';
+
+    // Convertir bytes a hexadecimal
+    function bytesToHex(bytes) {
+      return Array.from(bytes)
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+    }
+
+    // Validar login
+    async function validateLogin(event) {
+      event.preventDefault();
+      const password = document.getElementById('adminPassword').value;
+      const errorDiv = document.getElementById('loginError');
+      
+      if (!password) {
+        errorDiv.textContent = '⚠️ Ingresa la contraseña';
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      try {
+        // Generar hash SHA-256 de la contraseña ingresada
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashHex = bytesToHex(new Uint8Array(hashBuffer));
+
+        // Comparar con hash almacenado
+        if (hashHex === ADMIN_PASSWORD_HASH) {
+          // Contraseña correcta
+          localStorage.setItem(SESSION_KEY, 'true');
+          errorDiv.style.display = 'none';
+          document.getElementById('loginModal').style.display = 'none';
+          document.getElementById('adminContent').style.display = 'block';
+          // Limpiar campo
+          document.getElementById('adminPassword').value = '';
+        } else {
+          // Contraseña incorrecta
+          errorDiv.textContent = '❌ Contraseña incorrecta';
+          errorDiv.style.display = 'block';
+          document.getElementById('adminPassword').value = '';
+          document.getElementById('adminPassword').focus();
+        }
+      } catch (error) {
+        errorDiv.textContent = '❌ Error en validación: ' + error.message;
+        errorDiv.style.display = 'block';
+        console.error(error);
+      }
+    }
+
+    // Verificar sesión al cargar página
+    function checkAdminSession() {
+      const isAuthenticated = localStorage.getItem(SESSION_KEY) === 'true';
+      const loginModal = document.getElementById('loginModal');
+      const adminContent = document.getElementById('adminContent');
+
+      if (isAuthenticated) {
+        loginModal.style.display = 'none';
+        adminContent.style.display = 'block';
+      } else {
+        loginModal.style.display = 'flex';
+        adminContent.style.display = 'none';
+      }
+    }
+
+    // Logout
+    function logoutAdmin() {
+      localStorage.removeItem(SESSION_KEY);
+      document.getElementById('adminPassword').value = '';
+      document.getElementById('loginModal').style.display = 'flex';
+      document.getElementById('adminContent').style.display = 'none';
+    }
+
+    // Verificar sesión al cargar
+    window.addEventListener('load', checkAdminSession);
   </script>
 
 </body>
