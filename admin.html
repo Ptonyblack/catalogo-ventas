@@ -33,7 +33,7 @@
     </div>
   </div>
 
-  <div class="admin-container" style="display: none;" id="adminContent">
+  <div class="admin-container" id="adminContent" style="display: none;">
     <!-- SIDEBAR -->
     <aside class="sidebar">
       <div class="sidebar-header">
@@ -394,7 +394,7 @@
           localStorage.setItem(SESSION_KEY, 'true');
           errorDiv.style.display = 'none';
           document.getElementById('loginModal').style.display = 'none';
-          document.getElementById('adminContent').style.display = 'block';
+          document.getElementById('adminContent').style.display = 'grid';  // Cambiar a grid
           // Limpiar campo
           document.getElementById('adminPassword').value = '';
         } else {
@@ -419,7 +419,7 @@
 
       if (isAuthenticated) {
         loginModal.style.display = 'none';
-        adminContent.style.display = 'block';
+        adminContent.style.display = 'grid';  // Cambiar a grid para que funcione el layout
       } else {
         loginModal.style.display = 'flex';
         adminContent.style.display = 'none';
