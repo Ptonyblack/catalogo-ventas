@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Administrativo - Catálogo de Ventas</title>
+  <link rel="stylesheet" href="css/admin-styles.css">
+  <script src="js/firebase-config.js"></script>
+  <script type="module" src="js/firebase-init.js"></script>
+</head>
+<body>
+
+  <div class="admin-container">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>ADMIN</h2>
+        <p>Panel de Control</p>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="index.html" style="border-left: none;"><span></span> Ver Landing Page</a></li>
+        <li><a class="active" onclick="showSection('dashboardSection'); event.preventDefault()"><span></span> Dashboard</a></li>
+        <li><a onclick="showSection('productsSection'); event.preventDefault()"><span></span> Productos</a></li>
+        <li><a onclick="showSection('categoriesSection'); event.preventDefault()"><span></span> Categorías</a></li>
+        <li><a onclick="showSection('settingsSection'); event.preventDefault()"><span></span> Configuración</a></li>
+      </ul>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+      <!-- HEADER -->
+      <div class="header-bar">
+        <h1>Panel Administrativo</h1>
+        <a href="index.html" class="logout-btn">← Volver al Sitio</a>
+      </div>
+
+      <!-- DASHBOARD SECTION -->
+      <section id="dashboardSection" class="section active">
+        <h2>Dashboard</h2>
+        
+        <div class="stats-grid">
+          <div class="stat-card stat-total">
+            <div class="stat-icon"></div>
+            <div class="stat-number">0</div>
+            <div class="stat-label">Productos Totales</div>
+          </div>
+          <div class="stat-card stat-available">
+            <div class="stat-icon">✓</div>
+            <div class="stat-number">0</div>
+            <div class="stat-label">Productos Disponibles</div>
+          </div>
+          <div class="stat-card stat-unavailable">
+            <div class="stat-icon">✕</div>
+            <div class="stat-number">0</div>
+            <div class="stat-label">No Disponibles</div>
+          </div>
+          <div class="stat-card stat-units">
+            <div class="stat-icon"></div>
+            <div class="stat-number">0</div>
+            <div class="stat-label">Unidades en Stock</div>
+          </div>
+        </div>
+
+        <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+          <h3>Información Rápida</h3>
+          <p style="margin-top: 1rem; color: #666;">
+            Bienvenido al panel administrativo. Aquí puedes:
+          </p>
+          <ul style="margin-top: 1rem; margin-left: 2rem; color: #666; line-height: 1.8;">
+            <li><strong>Gestionar productos</strong> - Añadir, editar y eliminar</li>
+            <li><strong>Gestionar categorías</strong> - Organizar tus productos</li>
+            <li><strong>Configurar tienda</strong> - Numero WhatsApp y más</li>
+            <li><strong>Importar/Exportar datos</strong> - Respalda tu información</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- PRODUCTOS SECTION -->
+      <section id="productsSection" class="section">
+        <div class="table-header">
+          <h2>Gestionar Productos</h2>
+          <button class="add-btn" onclick="openProductForm()">+ Nuevo Producto</button>
+        </div>
+
+        <div class="table-container">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th>Categoría</th>
+                  <th>Precio USD</th>
+                  <th>Precio CUP</th>
+                  <th>Cajas</th>
+                  <th>Total Unidades</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Se llena dinámicamente con JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- CATEGORÍAS SECTION -->
+      <section id="categoriesSection" class="section">
+        <div class="table-header">
+          <h2>Gestionar Categorías</h2>
+          <button class="add-btn" onclick="openCategoryForm()">+ Nueva Categoría</button>
+        </div>
+
+        <div class="table-container">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th>Productos</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Se llena dinámicamente con JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONFIGURACIÓN SECTION -->
+      <section id="settingsSection" class="section">
+        <h2>Configuración</h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+          <!-- Información de Contacto -->
+          <div class="form-container">
+            <h3>Información de Contacto</h3>
+            <form id="contactForm">
+              <div class="form-group">
+                <label for="whatsappNumber">Número de WhatsApp *</label>
+                <input type="tel" id="whatsappNumber" placeholder="5351234567" required>
+                <small style="color: #666; display: block; margin-top: 0.3rem;">Sin espacios ni caracteres especiales</small>
+              </div>
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="contacto@ejemplo.com">
+              </div>
+              <button type="button" class="save-btn" onclick="saveContactInfo()">Guardar Cambios</button>
+            </form>
+          </div>
+
+          <!-- Información de la Tienda -->
+          <div class="form-container">
+            <h3>Información de la Tienda</h3>
+            <form id="storeForm">
+              <div class="form-group">
+                <label for="storeName">Nombre de la Tienda</label>
+                <input type="text" id="storeName" placeholder="Mi Tienda">
+              </div>
+              <div class="form-group">
+                <label for="storeLocation">Ubicación/País</label>
+                <input type="text" id="storeLocation" placeholder="Cuba">
+              </div>
+              <button type="button" class="save-btn" onclick="saveStoreInfo()">Guardar Cambios</button>
+            </form>
+          </div>
+
+          <!-- Respaldar y Restaurar Datos -->
+          <div class="form-container">
+            <h3>Respaldar Datos</h3>
+            <p style="color: #666; margin-bottom: 1rem;">Exporta todos tus productos y categorías en un archivo JSON</p>
+            <button class="save-btn" onclick="exportData()" style="margin-bottom: 1rem;">Descargar Datos</button>
+            
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Restaurar Datos</h3>
+            <p style="color: #666; margin-bottom: 1rem;">Carga un archivo JSON previamente guardado</p>
+            <input type="file" id="importFile" accept=".json" onchange="importData(event)" style="display: block; margin-bottom: 1rem;">
+          </div>
+
+          <!-- Datos por Defecto -->
+          <div class="form-container">
+            <h3>Datos por Defecto</h3>
+            <p style="color: #666; margin-bottom: 1rem;">Restaura los datos de ejemplo originales</p>
+            <button class="save-btn" style="background-color: #f39c12;" onclick="clearAllData()">Restaurar Datos de Ejemplo</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- MODAL: NUEVO/EDITAR PRODUCTO -->
+  <div class="modal" id="productModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Nuevo Producto</h2>
+        <button class="close-btn" onclick="closeProductModal()">&times;</button>
+      </div>
+      <form id="productForm" onsubmit="saveProduct(event)">
+        <div class="form-group">
+          <label for="productName">Nombre del Producto *</label>
+          <input type="text" id="productName" name="productName" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="productCategory">Categoría *</label>
+            <select id="productCategory" name="productCategory" required>
+              <option value="">Seleccionar categoría</option>
+              <!-- Se llena dinámicamente -->
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="productImage">Imagen del Producto *</label>
+          <input type="file" id="productImage" name="productImage" accept="image/*" required>
+          <small style="color: #666; display: block; margin-top: 0.3rem;">Formatos: JPG, PNG, WebP (máx 5MB)</small>
+          <div id="imagePreview" style="margin-top: 1rem; text-align: center;">
+            <img id="previewImg" src="" alt="Vista previa" style="max-width: 200px; max-height: 200px; display: none; border-radius: 8px; border: 2px solid #ddd;">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="productDescription">Descripción *</label>
+          <textarea id="productDescription" name="productDescription" required></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="priceUSD">Precio USD *</label>
+            <input type="number" id="priceUSD" name="priceUSD" step="0.01" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="priceCUP">Precio CUP *</label>
+            <input type="number" id="priceCUP" name="priceCUP" step="1" min="0" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="boxesAvailable">Cajas Disponibles *</label>
+            <input type="number" id="boxesAvailable" name="boxesAvailable" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="unitsPerBox">Unidades por Caja *</label>
+            <input type="number" id="unitsPerBox" name="unitsPerBox" min="1" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="available" name="available" checked>
+            Producto Disponible
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="save-btn">Guardar Producto</button>
+          <button type="button" class="cancel-btn" onclick="closeProductModal()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: NUEVA/EDITAR CATEGORÍA -->
+  <div class="modal" id="categoryModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Nueva Categoría</h2>
+        <button class="close-btn" onclick="closeCategoryModal()">&times;</button>
+      </div>
+      <form id="categoryForm" onsubmit="saveCategory(event)">
+        <div class="form-group">
+          <label for="categoryId">ID de Categoría *</label>
+          <input type="text" id="categoryId" name="categoryId" readonly required>
+          <small style="color: #666; display: block; margin-top: 0.3rem;">Se genera automáticamente (numérico)</small>
+        </div>
+
+        <div class="form-group">
+          <label for="categoryName">Nombre de la Categoría *</label>
+          <input type="text" id="categoryName" name="categoryName" placeholder="Purés" required>
+        </div>
+
+        <div class="form-group">
+          <label for="categoryIcon">Emoji/Icono *</label>
+          <input type="text" id="categoryIcon" name="categoryIcon" placeholder="🥄" required>
+          <small style="color: #666; display: block; margin-top: 0.3rem;">Un emoji que represente la categoría</small>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="save-btn">Guardar Categoría</button>
+          <button type="button" class="cancel-btn" onclick="closeCategoryModal()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/admin.js"></script>
+
+  <script>
+    // Las categorías ya se rellenan automáticamente en admin.js con populateCategorySelect()
+
+    // Guardar información de contacto
+    function saveContactInfo() {
+      const whatsapp = document.getElementById('whatsappNumber').value;
+      const email = document.getElementById('email').value;
+      localStorage.setItem('contact_whatsapp', whatsapp);
+      localStorage.setItem('contact_email', email);
+      showMessage('Información de contacto guardada', 'success');
+    }
+
+    // Guardar información de la tienda
+    function saveStoreInfo() {
+      const name = document.getElementById('storeName').value;
+      const location = document.getElementById('storeLocation').value;
+      localStorage.setItem('store_name', name);
+      localStorage.setItem('store_location', location);
+      showMessage('Información de la tienda guardada', 'success');
+    }
+
+    // Cargar información guardada
+    window.addEventListener('load', function() {
+      const whatsapp = localStorage.getItem('contact_whatsapp');
+      const email = localStorage.getItem('contact_email');
+      const storeName = localStorage.getItem('store_name');
+      const storeLocation = localStorage.getItem('store_location');
+
+      if (whatsapp) document.getElementById('whatsappNumber').value = whatsapp;
+      if (email) document.getElementById('email').value = email;
+      if (storeName) document.getElementById('storeName').value = storeName;
+      if (storeLocation) document.getElementById('storeLocation').value = storeLocation;
+    });
+  </script>
+
+</body>
+</html>

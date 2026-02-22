@@ -1,0 +1,27 @@
+# Archivos del Sistema
+.DS_Store
+Thumbs.db
+.env
+.env.local
+
+# Carpetas de dependencias (si las hay en el futuro)
+node_modules/
+dist/
+build/
+
+# Respaldos
+*.bak
+*.backup
+~*
+
+# Archivos de editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Variables locales de desarrollo
+local-config.js
