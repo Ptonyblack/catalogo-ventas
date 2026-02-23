@@ -53,10 +53,10 @@ function populateCategorySelect() {
 
 async function loadDataFromStorage() {
   // Intentar cargar de Firebase primero
-  if (firebaseActive) {
+  if (window.firebaseActive) {
     try {
-      const fbProducts = await loadProductsFromFirebase();
-      const fbCategories = await loadCategoriesFromFirebase();
+      const fbProducts = await window.loadProductsFromFirebase();
+      const fbCategories = await window.loadCategoriesFromFirebase();
       
       if (fbProducts) {
         products = fbProducts;
@@ -106,9 +106,9 @@ async function saveDataToStorage() {
 
 async function saveSyncedData() {
   // Guardar en Firebase primero
-  if (firebaseActive) {
-    const productosSaved = await saveProductsToFirebase(products);
-    const categoriasSaved = await saveCategoriesFirebase(categories);
+  if (window.firebaseActive) {
+    const productosSaved = await window.saveProductsToFirebase(products);
+    const categoriasSaved = await window.saveCategoriesFirebase(categories);
     
     if (productosSaved && categoriasSaved) {
       console.log('✅ Datos guardados en Firebase');
@@ -584,9 +584,9 @@ async function clearAllData() {
   if (confirm('⚠️ ADVERTENCIA: Esta acción eliminará TODOS los datos. ¿Estás completamente seguro?')) {
     if (confirm('Esta es tu última oportunidad. ¿Deseas continuar?')) {
       // Limpiar Firebase primero
-      if (firebaseActive) {
-        await saveProductsToFirebase([]);
-        await saveCategoriesFirebase([]);
+      if (window.firebaseActive) {
+        await window.saveProductsToFirebase([]);
+        await window.saveCategoriesFirebase([]);
       }
       
       // Limpiar localStorage
