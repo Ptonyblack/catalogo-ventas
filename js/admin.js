@@ -53,48 +53,58 @@ function populateCategorySelect() {
 
 async function loadDataFromStorage() {
   // Intentar cargar de Firebase primero
+  let loadedFromFirebase = false;
+  
   if (window.firebaseActive) {
     try {
       const fbProducts = await window.loadProductsFromFirebase();
       const fbCategories = await window.loadCategoriesFromFirebase();
       
-      if (fbProducts) {
-        products = fbProducts;
-      }
-      if (fbCategories) {
-        categories = fbCategories;
-      }
-      
-      if (fbProducts && fbCategories) {
-        return; // Datos cargados correctamente de Firebase
+      // Si Firebase tiene datos, usarlos aunque sea solo uno de los dos
+      if (fbProducts || fbCategories) {
+        if (fbProducts) {
+          products = fbProducts;
+          console.log('✅ Productos cargados desde Firebase:', fbProducts.length);
+        }
+        if (fbCategories) {
+          categories = fbCategories;
+          console.log('✅ Categorías cargadas desde Firebase:', fbCategories.length);
+        }
+        loadedFromFirebase = true;
       }
     } catch (e) {
       console.error('Error cargando de Firebase:', e);
     }
   }
   
-  // Fallback: Cargar desde localStorage si Firebase no tiene datos
-  const storedProducts = localStorage.getItem(STORAGE_KEY);
-  if (storedProducts) {
-    try {
-      products = JSON.parse(storedProducts);
-    } catch (e) {
-      console.error('Error cargando productos:', e);
+  // Si NO se cargaron datos de Firebase, usar localStorage SOLO como fallback
+  if (!loadedFromFirebase) {
+    console.log('⚠️ No hay datos en Firebase, usando localStorage como fallback');
+    const storedProducts = localStorage.getItem(STORAGE_KEY);
+    if (storedProducts) {
+      try {
+        products = JSON.parse(storedProducts);
+        console.log('✅ Productos cargados desde localStorage');
+      } catch (e) {
+        console.error('Error cargando productos de localStorage:', e);
+        await loadDefaultData();
+        return;
+      }
+    } else {
+      console.log('ℹ️ No hay datos en localStorage, cargando datos por defecto');
       await loadDefaultData();
       return;
     }
-  } else {
-    await loadDefaultData();
-    return;
-  }
-  
-  // Cargar categorías desde localStorage
-  const storedCategories = localStorage.getItem(STORAGE_KEY_CATEGORIES);
-  if (storedCategories) {
-    try {
-      categories = JSON.parse(storedCategories);
-    } catch (e) {
-      console.error('Error cargando categorías:', e);
+    
+    // Cargar categorías desde localStorage
+    const storedCategories = localStorage.getItem(STORAGE_KEY_CATEGORIES);
+    if (storedCategories) {
+      try {
+        categories = JSON.parse(storedCategories);
+        console.log('✅ Categorías cargadas desde localStorage');
+      } catch (e) {
+        console.error('Error cargando categorías de localStorage:', e);
+      }
     }
   }
 }
@@ -105,21 +115,28 @@ async function saveDataToStorage() {
 }
 
 async function saveSyncedData() {
-  // Guardar en Firebase primero
-  if (window.firebaseActive) {
-    const productosSaved = await window.saveProductsToFirebase(products);
-    const categoriasSaved = await window.saveCategoriesFirebase(categories);
-    
-    if (productosSaved && categoriasSaved) {
-      console.log('✅ Datos guardados en Firebase');
-      return;
-    }
-  }
-  
-  // Fallback: Guardar en localStorage si Firebase no está disponible
+  // Guardar SIEMPRE en localStorage como copia de seguridad
   localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
   localStorage.setItem(STORAGE_KEY_CATEGORIES, JSON.stringify(categories));
-  console.log('⚠️ Datos guardados en localStorage (Firebase no disponible)');
+  
+  // Guardar en Firebase si está disponible
+  if (window.firebaseActive) {
+    try {
+      const productosSaved = await window.saveProductsToFirebase(products);
+      const categoriasSaved = await window.saveCategoriesFirebase(categories);
+      
+      if (productosSaved && categoriasSaved) {
+        console.log('✅ Datos guardados en Firebase y localStorage');
+      } else {
+        console.log('⚠️ Datos guardados en localStorage (Firebase no disponible)');
+      }
+    } catch (e) {
+      console.error('Error guardando en Firebase:', e);
+      console.log('⚠️ Datos guardados en localStorage (error en Firebase)');
+    }
+  } else {
+    console.log('⚠️ Datos guardados en localStorage (Firebase inactivo)');
+  }
 }
 
 async function loadDefaultData() {
