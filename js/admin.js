@@ -34,7 +34,28 @@ function populateCategorySelect() {
 // ==================== CARGAR/GUARDAR DATOS ====================
 
 async function loadDataFromStorage() {
-  // Cargar productos
+  // Intentar cargar de Firebase primero
+  if (firebaseActive) {
+    try {
+      const fbProducts = await loadProductsFromFirebase();
+      const fbCategories = await loadCategoriesFromFirebase();
+      
+      if (fbProducts) {
+        products = fbProducts;
+      }
+      if (fbCategories) {
+        categories = fbCategories;
+      }
+      
+      if (fbProducts && fbCategories) {
+        return; // Datos cargados correctamente de Firebase
+      }
+    } catch (e) {
+      console.error('Error cargando de Firebase:', e);
+    }
+  }
+  
+  // Fallback: Cargar desde localStorage si Firebase no tiene datos
   const storedProducts = localStorage.getItem(STORAGE_KEY);
   if (storedProducts) {
     try {
@@ -42,12 +63,14 @@ async function loadDataFromStorage() {
     } catch (e) {
       console.error('Error cargando productos:', e);
       await loadDefaultData();
+      return;
     }
   } else {
     await loadDefaultData();
+    return;
   }
   
-  // Cargar categorías
+  // Cargar categorías desde localStorage
   const storedCategories = localStorage.getItem(STORAGE_KEY_CATEGORIES);
   if (storedCategories) {
     try {
@@ -64,14 +87,21 @@ async function saveDataToStorage() {
 }
 
 async function saveSyncedData() {
+  // Guardar en Firebase primero
+  if (firebaseActive) {
+    const productosSaved = await saveProductsToFirebase(products);
+    const categoriasSaved = await saveCategoriesFirebase(categories);
+    
+    if (productosSaved && categoriasSaved) {
+      console.log('✅ Datos guardados en Firebase');
+      return;
+    }
+  }
+  
+  // Fallback: Guardar en localStorage si Firebase no está disponible
   localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
   localStorage.setItem(STORAGE_KEY_CATEGORIES, JSON.stringify(categories));
-  
-  // Si Firebase está activo, también guardar allá
-  if (firebaseActive) {
-    await saveProductsToFirebase(products);
-    await saveCategoriesFirebase(categories);
-  }
+  console.log('⚠️ Datos guardados en localStorage (Firebase no disponible)');
 }
 
 async function loadDefaultData() {
@@ -532,14 +562,22 @@ function setupEventListeners() {
 
 // ==================== OPCIONES ADICIONALES ====================
 
-function clearAllData() {
+async function clearAllData() {
   if (confirm('⚠️ ADVERTENCIA: Esta acción eliminará TODOS los datos. ¿Estás completamente seguro?')) {
     if (confirm('Esta es tu última oportunidad. ¿Deseas continuar?')) {
+      // Limpiar Firebase primero
+      if (firebaseActive) {
+        await saveProductsToFirebase([]);
+        await saveCategoriesFirebase([]);
+      }
+      
+      // Limpiar localStorage
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(STORAGE_KEY_CATEGORIES);
+      
       products = [];
       categories = [];
-      loadDefaultData();
+      await loadDefaultData();
       renderProductsTable();
       updateStats();
       showMessage('Datos restablecidos a valores por defecto', 'warning');

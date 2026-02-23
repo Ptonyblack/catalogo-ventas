@@ -69,23 +69,25 @@ function uploadImageAsBase64(file) {
 
 async function saveProductsToFirebase(products) {
   if (!firebaseActive) {
-    localStorage.setItem('catalog_products', JSON.stringify(products));
-    return;
+    console.warn('⚠️ Firebase no está activo. Los datos no se guardaron.');
+    return false;
   }
 
   try {
     const dbRef = ref(db, 'productos');
     await set(dbRef, products);
+    console.log('✅ Productos guardados en Firebase');
+    return true;
   } catch (error) {
     console.error('Error guardando en Firebase:', error);
-    localStorage.setItem('catalog_products', JSON.stringify(products));
+    return false;
   }
 }
 
 async function loadProductsFromFirebase() {
   if (!firebaseActive) {
-    const stored = localStorage.getItem('catalog_products');
-    return stored ? JSON.parse(stored) : null;
+    console.warn('⚠️ Firebase no está activo.');
+    return null;
   }
 
   try {
@@ -94,30 +96,31 @@ async function loadProductsFromFirebase() {
     return snapshot.val();
   } catch (error) {
     console.error('Error cargando de Firebase:', error);
-    const stored = localStorage.getItem('catalog_products');
-    return stored ? JSON.parse(stored) : null;
+    return null;
   }
 }
 
 async function saveCategoriesFirebase(categories) {
   if (!firebaseActive) {
-    localStorage.setItem('catalog_categories', JSON.stringify(categories));
-    return;
+    console.warn('⚠️ Firebase no está activo. Las categorías no se guardaron.');
+    return false;
   }
 
   try {
     const dbRef = ref(db, 'categorias');
     await set(dbRef, categories);
+    console.log('✅ Categorías guardadas en Firebase');
+    return true;
   } catch (error) {
     console.error('Error guardando categorías:', error);
-    localStorage.setItem('catalog_categories', JSON.stringify(categories));
+    return false;
   }
 }
 
 async function loadCategoriesFromFirebase() {
   if (!firebaseActive) {
-    const stored = localStorage.getItem('catalog_categories');
-    return stored ? JSON.parse(stored) : null;
+    console.warn('⚠️ Firebase no está activo.');
+    return null;
   }
 
   try {
@@ -126,8 +129,7 @@ async function loadCategoriesFromFirebase() {
     return snapshot.val();
   } catch (error) {
     console.error('Error cargando categorías:', error);
-    const stored = localStorage.getItem('catalog_categories');
-    return stored ? JSON.parse(stored) : null;
+    return null;
   }
 }
 

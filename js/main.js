@@ -11,33 +11,19 @@ let phoneNumber = '5351234567'; // Cambiar por el número de WhatsApp
 
 async function loadProducts() {
   try {
-    // Intentar cargar de Firebase primero
-    let data;
-    if (firebaseActive) {
-      const fbProducts = await loadProductsFromFirebase();
-      const fbCategories = await loadCategoriesFromFirebase();
-      
-      if (fbProducts) {
-        allProducts = fbProducts;
-        categories = fbCategories || [];
-      } else {
-        // Si Firebase está vacío, cargar datos por defecto
-        const response = await fetch('data/products.json');
-        data = await response.json();
-        allProducts = data.products;
-        categories = data.categories;
-      }
+    // Cargar desde Firebase
+    const fbProducts = await loadProductsFromFirebase();
+    const fbCategories = await loadCategoriesFromFirebase();
+    
+    if (fbProducts) {
+      allProducts = fbProducts;
+      categories = fbCategories || [];
     } else {
-      // Cargar desde localStorage si Firebase no está activo
-      const stored = localStorage.getItem('catalog_products');
-      if (stored) {
-        allProducts = JSON.parse(stored);
-      } else {
-        const response = await fetch('data/products.json');
-        data = await response.json();
-        allProducts = data.products;
-        categories = data.categories;
-      }
+      // Si Firebase está vacío, cargar datos por defecto
+      const response = await fetch('data/products.json');
+      const data = await response.json();
+      allProducts = data.products;
+      categories = data.categories;
     }
     
     filteredProducts = allProducts;
