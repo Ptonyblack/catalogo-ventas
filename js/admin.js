@@ -15,6 +15,7 @@ async function initializeAdmin() {
   updateStats();
   setupEventListeners();
   populateCategorySelect(); // Rellenar select DESPUÉS de cargar datos
+  loadConfigSettings(); // Cargar configuraciones guardadas
 }
 
 // Esperar a que Firebase esté listo antes de inicializar
@@ -518,6 +519,54 @@ function importData(event) {
     }
   };
   reader.readAsText(file);
+}
+
+// ==================== CONFIGURACIÓN ====================
+
+function loadConfigSettings() {
+  const config = JSON.parse(localStorage.getItem('storeConfig') || '{}');
+  
+  if (config.whatsappNumber) {
+    document.getElementById('whatsappNumber').value = config.whatsappNumber;
+  }
+  if (config.email) {
+    document.getElementById('email').value = config.email;
+  }
+  if (config.storeName) {
+    document.getElementById('storeName').value = config.storeName;
+  }
+  if (config.storeLocation) {
+    document.getElementById('storeLocation').value = config.storeLocation;
+  }
+}
+
+function saveContactInfo() {
+  const whatsappNumber = document.getElementById('whatsappNumber').value.trim();
+  const email = document.getElementById('email').value.trim();
+  
+  if (!whatsappNumber) {
+    showMessage('El número de WhatsApp es requerido', 'error');
+    return;
+  }
+  
+  const config = JSON.parse(localStorage.getItem('storeConfig') || '{}');
+  config.whatsappNumber = whatsappNumber;
+  config.email = email;
+  
+  localStorage.setItem('storeConfig', JSON.stringify(config));
+  showMessage('Información de contacto guardada correctamente', 'success');
+}
+
+function saveStoreInfo() {
+  const storeName = document.getElementById('storeName').value.trim();
+  const storeLocation = document.getElementById('storeLocation').value.trim();
+  
+  const config = JSON.parse(localStorage.getItem('storeConfig') || '{}');
+  config.storeName = storeName;
+  config.storeLocation = storeLocation;
+  
+  localStorage.setItem('storeConfig', JSON.stringify(config));
+  showMessage('Información de la tienda guardada correctamente', 'success');
 }
 
 // ==================== MENSAJES ====================

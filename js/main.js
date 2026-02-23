@@ -15,15 +15,23 @@ async function loadProducts() {
     const fbProducts = await loadProductsFromFirebase();
     const fbCategories = await loadCategoriesFromFirebase();
     
-    if (fbProducts) {
-      allProducts = fbProducts;
+    // USAR FIREBASE COMO FUENTE PRINCIPAL
+    if (window.firebaseActive) {
+      allProducts = fbProducts || [];
       categories = fbCategories || [];
+      
+      if (fbProducts && fbProducts.length > 0) {
+        console.log('✅ Productos cargados de Firebase:', fbProducts.length);
+      } else {
+        console.log('ℹ️ No hay productos en Firebase + base de datos');
+      }
     } else {
-      // Si Firebase está vacío, cargar datos por defecto
+      // Fallback: Solo si Firebase NO está activo
       const response = await fetch('data/products.json');
       const data = await response.json();
-      allProducts = data.products;
-      categories = data.categories;
+      allProducts = data.products || [];
+      categories = data.categories || [];
+      console.log('⚠️ Firebase no activo, usando datos locales');
     }
     
     filteredProducts = allProducts;
@@ -212,6 +220,13 @@ function contactByWhatsApp(productName, available) {
 // ==================== INICIALIZACIÓN ====================
 
 document.addEventListener('DOMContentLoaded', function() {
+  // Cargar número de WhatsApp desde configuración
+  const config = JSON.parse(localStorage.getItem('storeConfig') || '{}');
+  if (config.whatsappNumber) {
+    phoneNumber = config.whatsappNumber;
+    console.log('✅ Número de WhatsApp cargado:', phoneNumber);
+  }
+  
   loadProducts();
 });
 
