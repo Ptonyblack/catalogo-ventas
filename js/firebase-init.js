@@ -46,6 +46,7 @@ async function initializeFirebase() {
 function dispatchFirebaseReady() {
   const event = new Event('firebaseReady', { bubbles: true });
   document.dispatchEvent(event);
+  document.firebaseInitialized = true; // Marcar como inicializado
 }
 
 // ==================== FUNCIONES FIREBASE ====================

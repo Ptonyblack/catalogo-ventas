@@ -9,12 +9,30 @@ const STORAGE_KEY_CATEGORIES = 'catalog_categories';
 
 // ==================== INICIALIZACIÓN ====================
 
-document.addEventListener('DOMContentLoaded', async function() {
+async function initializeAdmin() {
   await loadDataFromStorage();
   renderProductsTable();
   updateStats();
   setupEventListeners();
   populateCategorySelect(); // Rellenar select DESPUÉS de cargar datos
+}
+
+// Esperar a que Firebase esté listo antes de inicializar
+document.addEventListener('firebaseReady', async function() {
+  console.log('✅ Firebase listo en admin.js, inicializando...');
+  await initializeAdmin();
+});
+
+// Fallback: Si Firebase no está configurado, inicializar de todas formas
+document.addEventListener('DOMContentLoaded', async function() {
+  // Dar un tiempo para que firebase esté listo
+  setTimeout(() => {
+    if (!document.firebaseInitialized) {
+      console.log('⚠️ Inicializando sin esperar a Firebase');
+      initializeAdmin();
+      document.firebaseInitialized = true;
+    }
+  }, 2000);
 });
 
 // Rellenar el select de categorías
