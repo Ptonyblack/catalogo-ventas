@@ -219,7 +219,9 @@ function contactByWhatsApp(productName, available) {
 
 // ==================== INICIALIZACIÓN ====================
 
-document.addEventListener('DOMContentLoaded', function() {
+// ESPERAR A QUE FIREBASE ESTÉ LISTO PRIMERO
+document.addEventListener('firebaseReady', function() {
+  console.log('✅ Firebase listo en main.js');
   // Cargar número de WhatsApp desde configuración
   const config = JSON.parse(localStorage.getItem('storeConfig') || '{}');
   if (config.whatsappNumber) {
@@ -228,6 +230,21 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   loadProducts();
+});
+
+// FALLBACK: Si Firebase no se inicializa en 3 segundos, cargar de todas formas
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(() => {
+    if (!document.firebaseInitialized) {
+      console.log('⚠️ Cargando productos sin esperar a Firebase');
+      const config = JSON.parse(localStorage.getItem('storeConfig') || '{}');
+      if (config.whatsappNumber) {
+        phoneNumber = config.whatsappNumber;
+      }
+      loadProducts();
+      document.firebaseInitialized = true;
+    }
+  }, 3000);
 });
 
 // ==================== BUSCAR PRODUCTOS ====================

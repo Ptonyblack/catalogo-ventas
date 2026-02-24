@@ -16,8 +16,34 @@ async function initializeAdmin() {
   setupEventListeners();
   populateCategorySelect(); // Rellenar select DESPUÉS de cargar datos
   loadConfigSettings(); // Cargar configuraciones guardadas
+  updateFirebaseStatusBanner(); // Mostrar estado de Firebase
 }
 
+// Actualizar el banner de estado de Firebase
+function updateFirebaseStatusBanner() {
+  const banner = document.getElementById('firebaseStatusBanner');
+  const icon = document.getElementById('firebaseStatusIcon');
+  const title = document.getElementById('firebaseStatusTitle');
+  const text = document.getElementById('firebaseStatusText');
+  
+  if (window.firebaseActive) {
+    // Firebase activo
+    banner.style.display = 'flex';
+    banner.style.background = '#f0fff4';
+    banner.style.borderLeft = '4px solid #2ecc71';
+    icon.textContent = '✅';
+    title.textContent = 'Firebase conectado';
+    text.textContent = 'Los productos se guardan en la nube y serán visibles en otros dispositivos';
+  } else {
+    // Firebase inactivo
+    banner.style.display = 'flex';
+    banner.style.background = '#fff5f5';
+    banner.style.borderLeft = '4px solid #e74c3c';
+    icon.textContent = '❌';
+    title.textContent = 'Firebase NO activo';
+    text.textContent = 'Abre DIAGNOSTICO_FIREBASE.html para configurar. Los cambios se guardan SOLO en tu PC.';
+  }
+}
 // Esperar a que Firebase esté listo antes de inicializar
 document.addEventListener('firebaseReady', async function() {
   console.log('✅ Firebase listo en admin.js, inicializando...');
@@ -112,7 +138,6 @@ async function loadDataFromStorage() {
 
 async function saveDataToStorage() {
   await saveSyncedData();
-  showMessage('Cambios guardados correctamente', 'success');
 }
 
 async function saveSyncedData() {
@@ -128,15 +153,18 @@ async function saveSyncedData() {
       
       if (productosSaved && categoriasSaved) {
         console.log('✅ Datos guardados en Firebase y localStorage');
+        showMessage('✅ Cambios guardados en la nube (Firebase) y copia local', 'success');
       } else {
         console.log('⚠️ Datos guardados en localStorage (Firebase no disponible)');
+        showMessage('⚠️ Cambios guardados localmente (Firebase sin disponibilidad)', 'warning');
       }
     } catch (e) {
       console.error('Error guardando en Firebase:', e);
-      console.log('⚠️ Datos guardados en localStorage (error en Firebase)');
+      showMessage('⚠️ Cambios guardados localmente (error en Firebase)', 'warning');
     }
   } else {
     console.log('⚠️ Datos guardados en localStorage (Firebase inactivo)');
+    showMessage('⚠️ ADVERTENCIA: Solo se guardan en tu PC. Abre DIAGNOSTICO_FIREBASE.html para activar Firebase', 'warning');
   }
 }
 

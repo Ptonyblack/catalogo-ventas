@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel Administrativo - Catálogo de Ventas</title>
   <link rel="stylesheet" href="css/admin-styles.css">
-  <script src="js/firebase-config.js"></script>
-  <script type="module" src="js/firebase-init.js"></script>
 </head>
 <body>
 
@@ -55,6 +53,23 @@
       <div class="header-bar">
         <h1>Panel Administrativo</h1>
         <a href="index.html" class="logout-btn">← Volver al Sitio</a>
+      </div>
+
+      <!-- BANNER DE ESTADO FIREBASE -->
+      <div id="firebaseStatusBanner" style="
+        display: none;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+        align-items: center;
+        gap: 1rem;
+      ">
+        <span id="firebaseStatusIcon"></span>
+        <div>
+          <strong id="firebaseStatusTitle"></strong>
+          <p id="firebaseStatusText" style="margin: 0.25rem 0 0 0; font-size: 0.85rem; font-weight: normal;"></p>
+        </div>
       </div>
 
       <!-- DASHBOARD SECTION -->
@@ -322,6 +337,8 @@
     </div>
   </div>
 
+  <script src="js/firebase-config.js"></script>
+  <script type="module" src="js/firebase-init.js"></script>
   <script src="js/admin.js"></script>
 
   <script>

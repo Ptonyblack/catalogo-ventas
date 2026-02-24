@@ -6,8 +6,6 @@
   <title>Catálogo de Productos - Ventas Premium</title>
   <meta name="description" content="Catálogo de purés, vinagres y productos gourmet de alta calidad">
   <link rel="stylesheet" href="css/styles.css">
-  <script src="js/firebase-config.js"></script>
-  <script type="module" src="js/firebase-init.js"></script>
 </head>
 <body>
 
@@ -82,47 +80,64 @@
 
   <!-- MODAL DE COTIZACIÓN - REMOVIDO -->
 
+  <script src="js/firebase-config.js"></script>
+  <script type="module" src="js/firebase-init.js"></script>
   <script src="js/main.js"></script>
 
   <script>
     // Script para renderizar carousel dinámicamente
-    document.addEventListener('DOMContentLoaded', function() {
-      setTimeout(() => {
-        const carouselContainer = document.getElementById('carousel');
-        const dotsContainer = document.getElementById('carouselDots');
-        
-        // Crear slides del carousel
-        const carouselProducts = allProducts.slice(0, 5);
-        carouselProducts.forEach((product, index) => {
-          const slide = document.createElement('div');
-          slide.className = 'carousel-slide';
-          slide.innerHTML = `
-            <div class="slide-image"><img src="${product.imageUrl}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;"></div>
-            <div class="slide-content">
-              <h2>${product.name}</h2>
-              <p>${product.description}</p>
-              <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
-                <div>
-                  <p style="font-size: 0.9rem; color: #666;">Precio USD</p>
-                  <p style="font-size: 1.5rem; font-weight: bold; color: #2ecc71;">$${product.priceUSD.toFixed(2)}</p>
-                </div>
-                <div>
-                  <p style="font-size: 0.9rem; color: #666;">Precio CUP</p>
-                  <p style="font-size: 1.5rem; font-weight: bold; color: #2ecc71;">₱${product.priceCUP}</p>
-                </div>
+    // Esperar a que Firebase y productos estén listos
+    document.addEventListener('firebaseReady', function() {
+      renderCarousel();
+    });
+    
+    // Fallback si Firebase no se inicializa
+    setTimeout(() => {
+      if (allProducts && allProducts.length > 0) {
+        renderCarousel();
+      }
+    }, 2000);
+    
+    function renderCarousel() {
+      const carouselContainer = document.getElementById('carousel');
+      const dotsContainer = document.getElementById('carouselDots');
+      
+      if (!carouselContainer || !dotsContainer || !allProducts || allProducts.length === 0) {
+        console.warn('⚠️ No se puede renderizar carousel aún');
+        return;
+      }
+      
+      // Crear slides del carousel
+      const carouselProducts = allProducts.slice(0, 5);
+      carouselProducts.forEach((product, index) => {
+        const slide = document.createElement('div');
+        slide.className = 'carousel-slide';
+        slide.innerHTML = `
+          <div class="slide-image"><img src="${product.imageUrl}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;"></div>
+          <div class="slide-content">
+            <h2>${product.name}</h2>
+            <p>${product.description}</p>
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
+              <div>
+                <p style="font-size: 0.9rem; color: #666;">Precio USD</p>
+                <p style="font-size: 1.5rem; font-weight: bold; color: #2ecc71;">$${product.priceUSD.toFixed(2)}</p>
+              </div>
+              <div>
+                <p style="font-size: 0.9rem; color: #666;">Precio CUP</p>
+                <p style="font-size: 1.5rem; font-weight: bold; color: #2ecc71;">₱${product.priceCUP}</p>
               </div>
             </div>
-          `;
-          carouselContainer.appendChild(slide);
-          
-          // Crear dots
-          const dot = document.createElement('span');
-          dot.className = `dot ${index === 0 ? 'active' : ''}`;
-          dot.onclick = () => currentSlide(index);
-          dotsContainer.appendChild(dot);
-        });
-      }, 500);
-    });
+          </div>
+        `;
+        carouselContainer.appendChild(slide);
+        
+        // Crear dots
+        const dot = document.createElement('span');
+        dot.className = `dot ${index === 0 ? 'active' : ''}`;
+        dot.onclick = () => currentSlide(index);
+        dotsContainer.appendChild(dot);
+      });
+    }
   </script>
 
 </body>

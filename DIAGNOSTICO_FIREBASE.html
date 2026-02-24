@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnóstico Firebase</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #333;
+      margin-top: 0;
+    }
+    .check-item {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      margin: 0.5rem 0;
+      border-radius: 8px;
+      border-left: 4px solid #ddd;
+      background: #f9f9f9;
+    }
+    .check-item.pass {
+      border-left-color: #2ecc71;
+      background: #f0fff4;
+    }
+    .check-item.fail {
+      border-left-color: #e74c3c;
+      background: #fff5f5;
+    }
+    .check-item.warning {
+      border-left-color: #f39c12;
+      background: #fffbf0;
+    }
+    .status-icon {
+      font-size: 1.5rem;
+      margin-right: 1rem;
+      min-width: 30px;
+    }
+    .status-text {
+      flex: 1;
+    }
+    .status-text strong {
+      display: block;
+      color: #333;
+    }
+    .status-text span {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    .code-block {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+    }
+    .instructions {
+      background: #e8f4f8;
+      border-left: 4px solid #3498db;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 1.5rem 0;
+    }
+    .instructions h3 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+    .instructions ol {
+      color: #2c3e50;
+      line-height: 1.8;
+    }
+    .instructions li {
+      margin: 0.5rem 0;
+    }
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin: 0.5rem 0.5rem 0.5rem 0;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #5568d3;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    @media (max-width: 768px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 Diagnóstico Firebase</h1>
+    <p>Esta página verifica si Firebase está configurado correctamente para tu aplicación.</p>
+
+    <h2>Estado de Configuración</h2>
+    <div id="diagnosticResults"></div>
+
+    <h2>Lo que necesitas hacer</h2>
+    <div id="actionItems"></div>
+
+    <h2>¿Cómo funciona?</h2>
+    <div class="instructions">
+      <h3>🚀 Flujo de datos correcto:</h3>
+      <ol>
+        <li><strong>En admin.html:</strong> Agregas un producto</li>
+        <li><strong>Se guarda en Firebase:</strong> Los datos van a la nube</li>
+        <li><strong>En index.html (cualquier dispositivo):</strong> Se leen de Firebase</li>
+        <li><strong>TODOS los usuarios:</strong> Ven los mismos productos en tiempo real</li>
+      </ol>
+    </div>
+
+  </div>
+
+  <script src="js/firebase-config.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+    const diagnosticResults = document.getElementById('diagnosticResults');
+    const actionItems = document.getElementById('actionItems');
+
+    let checks = [];
+    let needsSetup = [];
+
+    // CHECK 1: Verificar si firebaseConfig existe
+    async function runDiagnostics() {
+      // ✅ CHECK 1: Config file
+      if (typeof firebaseConfig === 'undefined') {
+        checks.push({
+          status: 'fail',
+          icon: '❌',
+          title: 'firebase-config.js no encontrado',
+          description: 'El archivo de configuración no se cargó'
+        });
+        return;
+      }
+
+      checks.push({
+        status: 'pass',
+        icon: '✅',
+        title: 'firebase-config.js cargado',
+        description: 'Configuración encontrada'
+      });
+
+      // ✅ CHECK 2: Verificar campos obligatorios
+      const requiredFields = ['apiKey', 'projectId', 'databaseURL', 'authDomain'];
+      const hasAllFields = requiredFields.every(field => 
+        firebaseConfig[field] && !firebaseConfig[field].includes('TU_')
+      );
+
+      if (!hasAllFields) {
+        checks.push({
+          status: 'fail',
+          icon: '❌',
+          title: 'Configuración incompleta',
+          description: 'Faltan datos en firebase-config.js. Algunos campos tienen "TU_"'
+        });
+        needsSetup.push({
+          step: 1,
+          title: 'Actualizar firebase-config.js',
+          description: 'Ve a Firebase Console y copia el firebaseConfig correctamente',
+          action: 'https://console.firebase.google.com'
+        });
+        return;
+      }
+
+      checks.push({
+        status: 'pass',
+        icon: '✅',
+        title: 'Configuración completa',
+        description: `Proyecto: ${firebaseConfig.projectId}`
+      });
+
+      // ✅ CHECK 3: Intentar conectar a Firebase
+      try {
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        checks.push({
+          status: 'pass',
+          icon: '✅',
+          title: 'Firebase inicializado',
+          description: 'Conexión a Firebase estableci correctamente'
+        });
+
+        // ✅ CHECK 4: Intentar leer datos
+        try {
+          const testRef = ref(db, 'test');
+          const snapshot = await Promise.race([
+            get(testRef),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
+          ]);
+          
+          checks.push({
+            status: 'pass',
+            icon: '✅',
+            title: 'Lectura de datos funcionando',
+            description: 'Puedo leer de la Realtime Database'
+          });
+
+        } catch (e) {
+          checks.push({
+            status: 'warning',
+            icon: '⚠️',
+            title: 'No puedo leer datos',
+            description: e.message.includes('Timeout') ? 
+              'Timeout de conexión. Verifica tus reglas de Firebase' :
+              'Error: ' + e.message
+          });
+          needsSetup.push({
+            step: 2,
+            title: 'Configurar Realtime Database',
+            description: 'La base de datos no está creada o las reglas son incorrectas',
+            sub: [
+              '1. Ve a Firebase Console → Realtime Database',
+              '2. Si no existe, haz clic en "Crear base de datos"',
+              '3. Selecciona "us-central1" y "Modo de prueba"',
+              '4. Ve a "Reglas" y asegúrate de tener:',
+              '   { "rules": { ".read": true, ".write": true } }'
+            ]
+          });
+        }
+
+        // ✅ CHECK 5: Intentar escribir datos
+        try {
+          const testRef = ref(db, 'diagnostico');
+          await Promise.race([
+            set(testRef, { timestamp: new Date().toISOString(), status: 'test' }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
+          ]);
+          
+          checks.push({
+            status: 'pass',
+            icon: '✅',
+            title: 'Escritura de datos funcionando',
+            description: 'Puedo guardar datos en la Realtime Database'
+          });
+
+        } catch (e) {
+          checks.push({
+            status: 'fail',
+            icon: '❌',
+            title: 'No puedo escribir datos',
+            description: 'Error: ' + e.message + ' (Probablemente permisos insuficientes)'
+          });
+          needsSetup.push({
+            step: 3,
+            title: 'Habilitar escritura en Firebase',
+            description: 'Las reglas de seguridad no permiten escribir',
+            sub: [
+              '1. Firebase Console → Realtime Database → Reglas',
+              '2. Reemplaza con:',
+              '3. { "rules": { ".read": true, ".write": true } }',
+              '4. Haz clic en "Publicar"'
+            ]
+          });
+        }
+
+      } catch (e) {
+        checks.push({
+          status: 'fail',
+          icon: '❌',
+          title: 'Error inicializando Firebase',
+          description: e.message
+        });
+        needsSetup.push({
+          step: 1,
+          title: 'Verificar configuración de Firebase',
+          description: 'Revisa que firebase-config.js tenga los datos correctos'
+        });
+      }
+
+      // Renderizar resultados
+      renderDiagnostics();
+    }
+
+    function renderDiagnostics() {
+      // Renderizar checks
+      diagnosticResults.innerHTML = checks.map(check => `
+        <div class="check-item ${check.status}">
+          <div class="status-icon">${check.icon}</div>
+          <div class="status-text">
+            <strong>${check.title}</strong>
+            <span>${check.description}</span>
+          </div>
+        </div>
+      `).join('');
+
+      // Renderizar acciones necesarias
+      if (needsSetup.length > 0) {
+        actionItems.innerHTML = `
+          <div class="instructions">
+            <h3>🔧 Pasos a seguir:</h3>
+            ${needsSetup.map(item => `
+              <div style="margin: 1.5rem 0; padding: 1rem; background: white; border-radius: 8px; border-left: 4px solid #f39c12;">
+                <strong>PASO ${item.step}: ${item.title}</strong>
+                <p style="margin: 0.5rem 0 0 0; color: #666;">${item.description}</p>
+                ${item.sub ? `
+                  <div style="background: #f5f5f5; padding: 1rem; border-radius: 4px; margin-top: 0.5rem; font-family: monospace; font-size: 0.85rem;">
+                    ${item.sub.join('<br>')}
+                  </div>
+                ` : ''}
+                ${item.action ? `
+                  <button onclick="window.open('${item.action}', '_blank')">
+                    Ir a Firebase Console
+                  </button>
+                ` : ''}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        actionItems.innerHTML = `
+          <div class="check-item pass">
+            <div class="status-icon">🎉</div>
+            <div class="status-text">
+              <strong>¡Firebase está totalmente configurado!</strong>
+              <span>Tus productos se están guardando en la nube y serán visibles en todos los dispositivos</span>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Ejecutar diagnóstico
+    runDiagnostics();
+  </script>
+</body>
+</html>

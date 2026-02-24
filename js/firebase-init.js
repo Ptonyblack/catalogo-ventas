@@ -18,7 +18,9 @@ async function initializeFirebase() {
     return;
   }
 
-  if (isFirebaseConfigured && isFirebaseConfigured()) {
+  // Verificar si Firebase está configurado correctamente
+  const isConfigured = isFirebaseConfigured();
+  if (isConfigured) {
     try {
       // Inicializar Firebase con el config
       const app = initializeApp(firebaseConfig);
@@ -92,11 +94,17 @@ async function loadProductsFromFirebase() {
   }
 
   try {
+    // Timeout de 5 segundos para no bloquear indefinidamente
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Timeout al cargar productos')), 5000)
+    );
+    
     const dbRef = ref(db, 'productos');
-    const snapshot = await get(dbRef);
+    const loadPromise = get(dbRef);
+    const snapshot = await Promise.race([loadPromise, timeoutPromise]);
     return snapshot.val();
   } catch (error) {
-    console.error('Error cargando de Firebase:', error);
+    console.error('Error cargando de Firebase:', error.message);
     return null;
   }
 }
@@ -125,20 +133,31 @@ async function loadCategoriesFromFirebase() {
   }
 
   try {
+    // Timeout de 5 segundos para no bloquear indefinidamente
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Timeout al cargar categorías')), 5000)
+    );
+    
     const dbRef = ref(db, 'categorias');
-    const snapshot = await get(dbRef);
+    const loadPromise = get(dbRef);
+    const snapshot = await Promise.race([loadPromise, timeoutPromise]);
     return snapshot.val();
   } catch (error) {
-    console.error('Error cargando categorías:', error);
+    console.error('Error cargando categorías:', error.message);
     return null;
   }
 }
 
 // Inicializar cuando el DOM esté listo
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeFirebase);
+  document.addEventListener('DOMContentLoaded', async () => {
+    console.log('📍 DOMContentLoaded - Inicializando Firebase...');
+    await initializeFirebase();
+  });
 } else {
-  initializeFirebase();
+  // Si el DOM ya está cargado, inicializar inmediatamente
+  console.log('📍 DOM ya cargado - Inicializando Firebase...');
+  initializeFirebase().catch(e => console.error('Error en inicializeFirebase:', e));
 }
 
 // Exponer funciones y estado globales para compatibilidad con scripts no-módulo
