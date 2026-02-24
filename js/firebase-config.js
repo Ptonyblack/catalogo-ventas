@@ -6,6 +6,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyBtJKpw2xwEEoq0U5Ef8sP3AIvLxMd5qCY",
   authDomain: "ventas-catalogo-6eb6f.firebaseapp.com",
   projectId: "ventas-catalogo-6eb6f",
+  databaseURL: "https://ventas-catalogo-6eb6f-default-rtdb.firebaseio.com",
   storageBucket: "ventas-catalogo-6eb6f.firebasestorage.app",
   messagingSenderId: "511897766778",
   appId: "1:511897766778:web:5b187ed8431f5b890d24c3"
