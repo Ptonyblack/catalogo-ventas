@@ -79,61 +79,34 @@ function populateCategorySelect() {
 // ==================== CARGAR/GUARDAR DATOS ====================
 
 async function loadDataFromStorage() {
-  // Intentar cargar de Firebase primero
-  let loadedFromFirebase = false;
-  
+  // SIEMPRE intentar cargar de Firebase primero, es la fuente de verdad
   if (window.firebaseActive) {
     try {
+      console.log('📍 Cargando datos de Firebase...');
       const fbProducts = await window.loadProductsFromFirebase();
       const fbCategories = await window.loadCategoriesFromFirebase();
       
-      // Si Firebase tiene datos, usarlos aunque sea solo uno de los dos
-      if (fbProducts || fbCategories) {
-        if (fbProducts) {
-          products = fbProducts;
-          console.log('✅ Productos cargados desde Firebase:', fbProducts.length);
-        }
-        if (fbCategories) {
-          categories = fbCategories;
-          console.log('✅ Categorías cargadas desde Firebase:', fbCategories.length);
-        }
-        loadedFromFirebase = true;
-      }
+      // Usar lo que Firebase devuelva (aunque sea vacío)
+      products = fbProducts || [];
+      categories = fbCategories || [];
+      
+      console.log('✅ Datos cargados desde Firebase:');
+      console.log('   - Productos:', products.length);
+      console.log('   - Categorías:', categories.length);
+      
     } catch (e) {
-      console.error('Error cargando de Firebase:', e);
+      console.error('❌ Error cargando de Firebase:', e);
+      // Si hay error, empezar con datos vacíos
+      products = [];
+      categories = [];
     }
+  } else {
+    console.log('⚠️ Firebase no activo, iniciando con datos vacíos');
+    products = [];
+    categories = [];
   }
   
-  // Si NO se cargaron datos de Firebase, usar localStorage SOLO como fallback
-  if (!loadedFromFirebase) {
-    console.log('⚠️ No hay datos en Firebase, usando localStorage como fallback');
-    const storedProducts = localStorage.getItem(STORAGE_KEY);
-    if (storedProducts) {
-      try {
-        products = JSON.parse(storedProducts);
-        console.log('✅ Productos cargados desde localStorage');
-      } catch (e) {
-        console.error('Error cargando productos de localStorage:', e);
-        await loadDefaultData();
-        return;
-      }
-    } else {
-      console.log('ℹ️ No hay datos en localStorage, cargando datos por defecto');
-      await loadDefaultData();
-      return;
-    }
-    
-    // Cargar categorías desde localStorage
-    const storedCategories = localStorage.getItem(STORAGE_KEY_CATEGORIES);
-    if (storedCategories) {
-      try {
-        categories = JSON.parse(storedCategories);
-        console.log('✅ Categorías cargadas desde localStorage');
-      } catch (e) {
-        console.error('Error cargando categorías de localStorage:', e);
-      }
-    }
-  }
+  // NOTA: localStorage se usa SOLO para guardar cambios, NO para cargar
 }
 
 async function saveDataToStorage() {
