@@ -20,17 +20,12 @@ async function loadProducts() {
         const fbProducts = await window.loadProductsFromFirebase();
         const fbCategories = await window.loadCategoriesFromFirebase();
         
-        if (fbProducts) {
-          allProducts = fbProducts;
-          categories = fbCategories || [];
-          dataLoaded = true;
-          console.log('✅ Productos cargados de Firebase:', (fbProducts || []).length);
-        } else {
-          console.log('ℹ️ Firebase está vacío (sin productos aún)');
-          allProducts = [];
-          categories = [];
-          dataLoaded = true;
-        }
+        // Firebase retorna arrays (pueden ser vacíos)
+        allProducts = Array.isArray(fbProducts) ? fbProducts : [];
+        categories = Array.isArray(fbCategories) ? fbCategories : [];
+        
+        console.log('✅ Datos cargados de Firebase:', allProducts.length, 'productos,', categories.length, 'categorías');
+        dataLoaded = true;
       } catch (fbError) {
         console.error('⚠️ Error leyendo Firebase:', fbError.message);
         allProducts = [];

@@ -72,17 +72,26 @@ function uploadImageAsBase64(file) {
 
 async function saveProductsToFirebase(products) {
   if (!firebaseActive) {
-    console.warn('⚠️ Firebase no está activo. Los datos no se guardaron.');
+    console.warn('⚠️ Firebase no está activo. Los productos no se guardaron.');
     return false;
   }
 
   try {
+    // Asegurarse de que es un array válido
+    const productosToSave = Array.isArray(products) && products.length > 0 ? products : [];
     const dbRef = ref(db, 'productos');
-    await set(dbRef, products);
-    console.log('✅ Productos guardados en Firebase');
+    
+    if (productosToSave.length > 0) {
+      await set(dbRef, productosToSave);
+      console.log('✅ Productos guardados en Firebase:', productosToSave.length);
+    } else {
+      // Si no hay productos, limpiar la rama
+      await set(dbRef, null);
+      console.log('✅ Datos de productos limpiados en Firebase');
+    }
     return true;
   } catch (error) {
-    console.error('Error guardando en Firebase:', error);
+    console.error('Error guardando productos en Firebase:', error);
     return false;
   }
 }
@@ -90,7 +99,7 @@ async function saveProductsToFirebase(products) {
 async function loadProductsFromFirebase() {
   if (!firebaseActive) {
     console.warn('⚠️ Firebase no está activo.');
-    return null;
+    return [];  // Retornar array vacío, no null
   }
 
   try {
@@ -102,10 +111,13 @@ async function loadProductsFromFirebase() {
     const dbRef = ref(db, 'productos');
     const loadPromise = get(dbRef);
     const snapshot = await Promise.race([loadPromise, timeoutPromise]);
-    return snapshot.val();
+    
+    const data = snapshot.val();
+    // Si no hay datos o es null, retornar array vacío
+    return Array.isArray(data) ? data : [];
   } catch (error) {
-    console.error('Error cargando de Firebase:', error.message);
-    return null;
+    console.error('Error cargando productos de Firebase:', error.message);
+    return [];  // Retornar array vacío en caso de error
   }
 }
 
@@ -116,12 +128,21 @@ async function saveCategoriesFirebase(categories) {
   }
 
   try {
+    // Asegurarse de que es un array válido
+    const categoriasToSave = Array.isArray(categories) && categories.length > 0 ? categories : [];
     const dbRef = ref(db, 'categorias');
-    await set(dbRef, categories);
-    console.log('✅ Categorías guardadas en Firebase');
+    
+    if (categoriasToSave.length > 0) {
+      await set(dbRef, categoriasToSave);
+      console.log('✅ Categorías guardadas en Firebase:', categoriasToSave.length);
+    } else {
+      // Si no hay categorías, limpiar la rama
+      await set(dbRef, null);
+      console.log('✅ Datos de categorías limpiados en Firebase');
+    }
     return true;
   } catch (error) {
-    console.error('Error guardando categorías:', error);
+    console.error('Error guardando categorías en Firebase:', error);
     return false;
   }
 }
@@ -129,7 +150,7 @@ async function saveCategoriesFirebase(categories) {
 async function loadCategoriesFromFirebase() {
   if (!firebaseActive) {
     console.warn('⚠️ Firebase no está activo.');
-    return null;
+    return [];  // Retornar array vacío, no null
   }
 
   try {
@@ -141,10 +162,13 @@ async function loadCategoriesFromFirebase() {
     const dbRef = ref(db, 'categorias');
     const loadPromise = get(dbRef);
     const snapshot = await Promise.race([loadPromise, timeoutPromise]);
-    return snapshot.val();
+    
+    const data = snapshot.val();
+    // Si no hay datos o es null, retornar array vacío
+    return Array.isArray(data) ? data : [];
   } catch (error) {
-    console.error('Error cargando categorías:', error.message);
-    return null;
+    console.error('Error cargando categorías de Firebase:', error.message);
+    return [];  // Retornar array vacío en caso de error
   }
 }
 

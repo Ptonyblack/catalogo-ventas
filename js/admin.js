@@ -86,9 +86,9 @@ async function loadDataFromStorage() {
       const fbProducts = await window.loadProductsFromFirebase();
       const fbCategories = await window.loadCategoriesFromFirebase();
       
-      // Usar lo que Firebase devuelva (aunque sea vacío)
-      products = fbProducts || [];
-      categories = fbCategories || [];
+      // Usar lo que Firebase devuelva (puede ser array vacío)
+      products = Array.isArray(fbProducts) ? fbProducts : [];
+      categories = Array.isArray(fbCategories) ? fbCategories : [];
       
       console.log('✅ Datos cargados desde Firebase:');
       console.log('   - Productos:', products.length);
