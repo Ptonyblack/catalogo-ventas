@@ -11,38 +11,37 @@ let phoneNumber = '5351234567'; // Cambiar por el número de WhatsApp
 
 async function loadProducts() {
   try {
-    let hasFirebaseData = false;
+    let dataLoaded = false;
     
-    // Cargar desde Firebase (esperar a que estén disponibles)
-    if (window.loadProductsFromFirebase && window.firebaseActive) {
+    // PRIORITARIO: Cargar desde Firebase si está activo
+    if (window.firebaseActive && window.loadProductsFromFirebase) {
       try {
         console.log('📍 Intentando cargar de Firebase...');
         const fbProducts = await window.loadProductsFromFirebase();
         const fbCategories = await window.loadCategoriesFromFirebase();
         
-        if (fbProducts && fbProducts.length > 0) {
+        if (fbProducts) {
           allProducts = fbProducts;
           categories = fbCategories || [];
-          hasFirebaseData = true;
-          console.log('✅ Productos cargados de Firebase:', fbProducts.length);
+          dataLoaded = true;
+          console.log('✅ Productos cargados de Firebase:', (fbProducts || []).length);
         } else {
-          console.log('ℹ️ Firebase está vacío, usando fallback');
+          console.log('ℹ️ Firebase está vacío (sin productos aún)');
+          allProducts = [];
+          categories = [];
+          dataLoaded = true;
         }
       } catch (fbError) {
         console.error('⚠️ Error leyendo Firebase:', fbError.message);
+        allProducts = [];
+        categories = [];
+        dataLoaded = true;
       }
     } else {
-      console.log('⚠️ Firebase no disponible, usando fallback');
-    }
-    
-    // Si Firebase no tiene datos, cargar desde archivo local
-    if (!hasFirebaseData) {
-      console.log('📍 Cargando datos locales desde products.json...');
-      const response = await fetch('data/products.json');
-      const data = await response.json();
-      allProducts = data.products || [];
-      categories = data.categories || [];
-      console.log('✅ Datos locales cargados:', allProducts.length, 'productos');
+      console.log('⚠️ Firebase no activo, mostrando sin productos');
+      allProducts = [];
+      categories = [];
+      dataLoaded = true;
     }
     
     filteredProducts = allProducts;
