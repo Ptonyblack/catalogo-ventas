@@ -14,6 +14,8 @@ async function initializeFirebase() {
   if (typeof firebaseConfig === 'undefined') {
     console.error("❌ firebaseConfig no está definido");
     firebaseActive = false;
+    // Exponer firebaseActive INMEDIATAMENTE antes de cualquier evento
+    window.firebaseActive = firebaseActive;
     dispatchFirebaseReady();
     return;
   }
@@ -40,6 +42,10 @@ async function initializeFirebase() {
     console.log("ℹ️ Firebase no configurado. Usando localStorage.");
     firebaseActive = false;
   }
+  
+  // Exponer firebaseActive ANTES de emitir el evento
+  window.firebaseActive = firebaseActive;
+  console.log('✅ firebaseActive expuesto:', window.firebaseActive);
   
   // Emitir evento para notificar que Firebase está listo
   dispatchFirebaseReady();
@@ -185,10 +191,7 @@ if (document.readyState === 'loading') {
 }
 
 // Exponer funciones y estado globales para compatibilidad con scripts no-módulo
-Object.defineProperty(window, 'firebaseActive', {
-  get() { return firebaseActive; },
-  configurable: true
-});
+// NOTA: firebaseActive ya se expone en initializeFirebase() antes del evento firebaseReady
 
 Object.defineProperty(window, 'db', {
   get() { return db; },
@@ -210,5 +213,5 @@ window.loadCategoriesFromFirebase = loadCategoriesFromFirebase;
 
 // Marcar que Firebase está listo
 window.firebaseModuleReady = true;
-console.log('✅ Funciones Firebase expuestas a window');
+console.log('✅ Funciones Firebase expuestas a window (firebaseActive ya disponible)');
 
