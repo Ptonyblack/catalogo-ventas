@@ -11,23 +11,33 @@ let phoneNumber = '5351234567'; // Cambiar por el número de WhatsApp
 
 async function loadProducts() {
   try {
-    // Cargar desde Firebase (esperar a que estén disponibles)
-    const fbProducts = window.loadProductsFromFirebase ? await window.loadProductsFromFirebase() : null;
-    const fbCategories = window.loadCategoriesFromFirebase ? await window.loadCategoriesFromFirebase() : null;
+    let hasFirebaseData = false;
     
-    // USAR FIREBASE COMO FUENTE PRINCIPAL
-    if (window.firebaseActive && (fbProducts || fbCategories)) {
-      allProducts = fbProducts || [];
-      categories = fbCategories || [];
-      
-      if (fbProducts && fbProducts.length > 0) {
-        console.log('✅ Productos cargados de Firebase:', fbProducts.length);
-      } else {
-        console.log('ℹ️ No hay productos en Firebase, usando productos locales');
+    // Cargar desde Firebase (esperar a que estén disponibles)
+    if (window.loadProductsFromFirebase && window.firebaseActive) {
+      try {
+        console.log('📍 Intentando cargar de Firebase...');
+        const fbProducts = await window.loadProductsFromFirebase();
+        const fbCategories = await window.loadCategoriesFromFirebase();
+        
+        if (fbProducts && fbProducts.length > 0) {
+          allProducts = fbProducts;
+          categories = fbCategories || [];
+          hasFirebaseData = true;
+          console.log('✅ Productos cargados de Firebase:', fbProducts.length);
+        } else {
+          console.log('ℹ️ Firebase está vacío, usando fallback');
+        }
+      } catch (fbError) {
+        console.error('⚠️ Error leyendo Firebase:', fbError.message);
       }
     } else {
-      // Fallback: Cargar datos locales
-      console.log('⚠️ Cargando datos locales (fallback)');
+      console.log('⚠️ Firebase no disponible, usando fallback');
+    }
+    
+    // Si Firebase no tiene datos, cargar desde archivo local
+    if (!hasFirebaseData) {
+      console.log('📍 Cargando datos locales desde products.json...');
       const response = await fetch('data/products.json');
       const data = await response.json();
       allProducts = data.products || [];
