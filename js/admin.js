@@ -46,16 +46,28 @@ function updateFirebaseStatusBanner() {
 }
 // Esperar a que Firebase esté listo antes de inicializar
 document.addEventListener('firebaseReady', async function() {
-  console.log('✅ Firebase listo en admin.js, inicializando...');
+  console.log('✅ Firebase listo en admin.js');
+  console.log('   - firebaseActive:', window.firebaseActive);
+  console.log('   - firebaseModuleReady:', window.firebaseModuleReady);
+  document.firebaseInitialized = true;
   await initializeAdmin();
 });
 
 // Fallback: Si Firebase no está configurado, inicializar de todas formas
 document.addEventListener('DOMContentLoaded', async function() {
+  console.log('🔍 DOMContentLoaded - Estado de Firebase:');
+  console.log('   - window.firebaseActive:', window.firebaseActive);
+  console.log('   - window.firebaseModuleReady:', window.firebaseModuleReady);
+  console.log('   - document.firebaseInitialized:', document.firebaseInitialized);
+  
   // Dar un tiempo para que firebase esté listo
   setTimeout(() => {
+    console.log('⏱️ 2 segundo timeout check:');
+    console.log('   - firebaseActive:', window.firebaseActive);
+    console.log('   - firebaseInitialized:', document.firebaseInitialized);
+    
     if (!document.firebaseInitialized) {
-      console.log('⚠️ Inicializando sin esperar a Firebase');
+      console.log('⚠️ Inicializando sin esperar a Firebase (timeout)');
       initializeAdmin();
       document.firebaseInitialized = true;
     }
@@ -79,29 +91,41 @@ function populateCategorySelect() {
 // ==================== CARGAR/GUARDAR DATOS ====================
 
 async function loadDataFromStorage() {
+  console.log('🔍 loadDataFromStorage() iniciada');
+  console.log('   - firebaseActive:', window.firebaseActive);
+  console.log('   - window.loadCategoriesFromFirebase existe:', typeof window.loadCategoriesFromFirebase);
+  
   // SIEMPRE intentar cargar de Firebase primero, es la fuente de verdad
   if (window.firebaseActive) {
     try {
-      console.log('📍 Cargando datos de Firebase...');
+      console.log('📍 Intentando cargar datos de Firebase...');
+      
+      console.log('📦 Llamando loadProductsFromFirebase...');
       const fbProducts = await window.loadProductsFromFirebase();
+      console.log('📦 Respuesta de loadProductsFromFirebase:', fbProducts);
+      
+      console.log('📦 Llamando loadCategoriesFromFirebase...');
       const fbCategories = await window.loadCategoriesFromFirebase();
+      console.log('📦 Respuesta de loadCategoriesFromFirebase:', fbCategories);
       
       // Usar lo que Firebase devuelva (puede ser array vacío)
       products = Array.isArray(fbProducts) ? fbProducts : [];
       categories = Array.isArray(fbCategories) ? fbCategories : [];
       
-      console.log('✅ Datos cargados desde Firebase:');
+      console.log('✅ Datos asignados a variables:');
       console.log('   - Productos:', products.length);
       console.log('   - Categorías:', categories.length);
+      console.log('   - Contenido categorías:', categories);
       
     } catch (e) {
       console.error('❌ Error cargando de Firebase:', e);
+      console.error('   - Mensaje:', e.message);
       // Si hay error, empezar con datos vacíos
       products = [];
       categories = [];
     }
   } else {
-    console.log('⚠️ Firebase no activo, iniciando con datos vacíos');
+    console.log('⚠️ Firebase NO está activo, iniciando con datos vacíos');
     products = [];
     categories = [];
   }
