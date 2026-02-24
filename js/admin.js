@@ -118,11 +118,23 @@ async function saveSyncedData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
   localStorage.setItem(STORAGE_KEY_CATEGORIES, JSON.stringify(categories));
   
+  console.log('📝 Guardando datos:', {
+    productos: products.length,
+    categorias: categories.length,
+    firebaseActivo: window.firebaseActive
+  });
+  
   // Guardar en Firebase si está disponible
   if (window.firebaseActive) {
     try {
+      console.log('📍 Enviando a Firebase...');
       const productosSaved = await window.saveProductsToFirebase(products);
       const categoriasSaved = await window.saveCategoriesFirebase(categories);
+      
+      console.log('✅ Respuesta Firebase:', {
+        productosSaved,
+        categoriasSaved
+      });
       
       if (productosSaved && categoriasSaved) {
         console.log('✅ Datos guardados en Firebase y localStorage');
