@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verificar Datos Firebase - Catálogo Ventas</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    
+    .status {
+      display: flex;
+      gap: 20px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .status-item {
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    
+    .status-item.loading {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .status-item.success {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .status-item.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .panel {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .panel h2 {
+      color: #667eea;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 10px;
+    }
+    
+    .data-item {
+      background: #f8f9fa;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .data-item h3 {
+      color: #333;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    
+    .data-item pre {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 10px;
+      border-radius: 3px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    
+    .console {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+      border-radius: 5px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    
+    .console-line {
+      margin-bottom: 5px;
+    }
+    
+    .console-info { color: #4ec9b0; }
+    .console-success { color: #6a9955; }
+    .console-error { color: #f48771; }
+    .console-warning { color: #dcdcaa; }
+    
+    .buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+    
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #c82333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔍 Verificador de Datos Firebase</h1>
+      <p>Esta página diagnostica qué datos tiene Firebase y cómo los está leyendo tu app</p>
+      
+      <div class="status">
+        <div class="status-item loading" id="firebaseStatus">⏳ Cargando Firebase...</div>
+        <div class="status-item" id="firebaseConnection">🔌 Desconectado</div>
+        <div class="status-item" id="dataCount">📊 Esperando...</div>
+      </div>
+    </div>
+    
+    <div class="panel">
+      <h2>⚙️ Estado de Firebase</h2>
+      <div id="firebaseInfo" class="data-item">
+        <h3>Inicializando...</h3>
+        <pre id="firebaseConfig">Cargando información...</pre>
+      </div>
+    </div>
+    
+    <div class="panel">
+      <h2>📦 Datos en Firebase</h2>
+      
+      <div class="data-item">
+        <h3>Productos</h3>
+        <pre id="productsData">Cargando...</pre>
+      </div>
+      
+      <div class="data-item">
+        <h3>Categorías</h3>
+        <pre id="categoriesData">Cargando...</pre>
+      </div>
+    </div>
+    
+    <div class="panel">
+      <h2>📋 Consola de Diagnóstico</h2>
+      <div class="console" id="console"></div>
+    </div>
+    
+    <div class="panel">
+      <div class="buttons">
+        <button class="btn-primary" onclick="reloadData()">🔄 Recargar Datos</button>
+        <button class="btn-secondary" onclick="testConnection()">🔌 Probar Conexión</button>
+        <button class="btn-danger" onclick="clearCache()">🗑️ Limpiar Caché Local</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/firebase-config.js"></script>
+  <script type="module" src="js/firebase-init.js"></script>
+
+  <script>
+    const consoleEl = document.getElementById('console');
+    
+    function log(message, type = 'info') {
+      const line = document.createElement('div');
+      line.className = `console-line console-${type}`;
+      line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      consoleEl.appendChild(line);
+      consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
+    
+    function updateStatus(name, status, type = 'loading') {
+      const el = document.getElementById(name);
+      if (el) {
+        el.textContent = status;
+        el.className = `status-item ${type}`;
+      }
+    }
+    
+    async function loadData() {
+      log('Iniciando carga de datos...', 'info');
+      
+      // Esperar a que Firebase esté listo
+      await new Promise(resolve => {
+        if (window.firebaseActive) {
+          resolve();
+        } else {
+          const checkInterval = setInterval(() => {
+            if (window.firebaseActive) {
+              clearInterval(checkInterval);
+              resolve();
+            }
+          }, 100);
+          
+          setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve();
+          }, 5000);
+        }
+      });
+      
+      try {
+        log('🔌 firebase está activo: ' + window.firebaseActive, window.firebaseActive ? 'success' : 'error');
+        updateStatus('firebaseStatus', '✅ Firebase listo', 'success');
+        
+        if (window.firebaseActive) {
+          updateStatus('firebaseConnection', '✅ Conectado', 'success');
+        } else {
+          updateStatus('firebaseConnection', '❌ Sin conexión', 'error');
+        }
+        
+        // Cargar productos
+        log('📦 Cargando productos...', 'info');
+        const products = await window.loadProductsFromFirebase();
+        log(`✅ ${products.length} productos cargados`, 'success');
+        document.getElementById('productsData').textContent = JSON.stringify(products, null, 2);
+        
+        // Cargar categorías
+        log('📦 Cargando categorías...', 'info');
+        const categories = await window.loadCategoriesFromFirebase();
+        log(`✅ ${categories.length} categorías cargadas`, 'success');
+        document.getElementById('categoriesData').textContent = JSON.stringify(categories, null, 2);
+        
+        // Actualizar contador
+        updateStatus('dataCount', `📊 ${products.length} productos, ${categories.length} categorías`, 'success');
+        
+      } catch (error) {
+        log('❌ Error: ' + error.message, 'error');
+        updateStatus('firebaseStatus', '❌ Error cargando', 'error');
+      }
+    }
+    
+    function reloadData() {
+      log('🔄 Recargando datos...', 'warning');
+      document.getElementById('productsData').textContent = 'Cargando...';
+      document.getElementById('categoriesData').textContent = 'Cargando...';
+      loadData();
+    }
+    
+    async function testConnection() {
+      log('🔌 Probando conexión a Firebase...', 'info');
+      try {
+        const test = await Promise.race([
+          window.loadProductsFromFirebase(),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Timeout')), 5000)
+          )
+        ]);
+        log('✅ Conexión exitosa a Firebase', 'success');
+      } catch (error) {
+        log('❌ Error de conexión: ' + error.message, 'error');
+      }
+    }
+    
+    function clearCache() {
+      if (confirm('¿Estás seguro? Esto borrará los datos locales del navegador.')) {
+        localStorage.clear();
+        log('🗑️ Caché limpiado', 'success');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
+    }
+    
+    // Cargar datos al abrir la página
+    log('🚀 Página de diagnóstico iniciada', 'info');
+    window.addEventListener('load', loadData);
+    
+    // Timeout por si no carga
+    setTimeout(() => {
+      if (window.firebaseActive === undefined) {
+        log('⚠️ Firebase no se inicializó después de 3s, intentando de todas formas...', 'warning');
+        loadData();
+      }
+    }, 3000);
+  </script>
+</body>
+</html>
