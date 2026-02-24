@@ -235,9 +235,10 @@
           const testRef = ref(db, 'test');
           const snapshot = await Promise.race([
             get(testRef),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout esperando respuesta de Firebase (3s)')), 3000))
           ]);
           
+          console.log('✅ Lectura exitosa');
           checks.push({
             status: 'pass',
             icon: '✅',
@@ -246,25 +247,28 @@
           });
 
         } catch (e) {
-          console.error('Error en lectura:', e.message);
+          console.error('❌ Error en lectura:', e.message);
           checks.push({
             status: 'warning',
             icon: '⚠️',
             title: 'No puedo leer datos',
             description: e.message.includes('Timeout') ? 
-              'Timeout de conexión. Verifica tus reglas de Firebase' :
+              'Timeout de conexión (3+ segundos sin respuesta). La base de datos NO existe o las reglas son incorrectas' :
               'Error: ' + e.message
           });
           needsSetup.push({
             step: 2,
-            title: 'Configurar Realtime Database',
-            description: 'La base de datos no está creada o las reglas son incorrectas',
+            title: 'Crear y Configurar Realtime Database',
+            description: 'La base de datos no existe o las reglas de seguridad están mal',
             sub: [
-              '1. Ve a Firebase Console → Realtime Database',
-              '2. Si no existe, haz clic en "Crear base de datos"',
-              '3. Selecciona "us-central1" y "Modo de prueba"',
-              '4. Ve a "Reglas" y asegúrate de tener:',
-              '   { "rules": { ".read": true, ".write": true } }'
+              '1. Ve a: https://console.firebase.google.com',
+              '2. Selecciona proyecto: "ventas-catalogo-6eb6f"',
+              '3. Izquierda → "Realtime Database"',
+              '4. Si NO existe, haz clic en "Crear base de datos"',
+              '5. Ubicación: us-central1 | Modo: INICIA EN MODO DE PRUEBA',
+              '6. Ve a pestaña "REGLAS" y copia esto:',
+              '   { "rules": { ".read": true, ".write": true } }',
+              '7. Haz clic en "PUBLICAR"'
             ]
           });
         }
@@ -275,9 +279,10 @@
           const testRef = ref(db, 'diagnostico');
           await Promise.race([
             set(testRef, { timestamp: new Date().toISOString(), status: 'test' }),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout esperando respuesta de Firebase (3s)')), 3000))
           ]);
           
+          console.log('✅ Escritura exitosa');
           checks.push({
             status: 'pass',
             icon: '✅',
@@ -286,24 +291,29 @@
           });
 
         } catch (e) {
-          console.error('Error en escritura:', e.message);
+          console.error('❌ Error en escritura:', e.message);
           checks.push({
             status: 'fail',
             icon: '❌',
             title: 'No puedo escribir datos',
-            description: 'Error: ' + e.message + ' (Probablemente permisos insuficientes)'
+            description: e.message.includes('Timeout') ? 
+              'Timeout esperando respuesta (3+ segundos). Las reglas NO permiten escribir' :
+              'Error: ' + e.message + ' (Probablemente permisos insuficientes)'
           });
-          needsSetup.push({
-            step: 3,
-            title: 'Habilitar escritura en Firebase',
-            description: 'Las reglas de seguridad no permiten escribir',
-            sub: [
-              '1. Firebase Console → Realtime Database → Reglas',
-              '2. Reemplaza con:',
-              '3. { "rules": { ".read": true, ".write": true } }',
-              '4. Haz clic en "Publicar"'
-            ]
-          });
+          if (!e.message.includes('Timeout')) {
+            needsSetup.push({
+              step: 3,
+              title: 'Habilitar escritura en Firebase',
+              description: 'Las reglas de seguridad no permiten escribir',
+              sub: [
+                '1. Firebase Console → ventas-catalogo-6eb6f',
+                '2. Realtime Database → REGLAS',
+                '3. Reemplaza TODO con:',
+                '   { "rules": { ".read": true, ".write": true } }',
+                '4. Haz clic en "PUBLICAR"'
+              ]
+            });
+          }
         }
 
       } catch (e) {
