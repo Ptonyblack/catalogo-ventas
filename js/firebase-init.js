@@ -176,10 +176,15 @@ Object.defineProperty(window, 'storage', {
   configurable: true
 });
 
+// Exponer funciones directamente
 window.initializeFirebase = initializeFirebase;
 window.uploadProductImage = uploadProductImage;
 window.saveProductsToFirebase = saveProductsToFirebase;
 window.loadProductsFromFirebase = loadProductsFromFirebase;
 window.saveCategoriesFirebase = saveCategoriesFirebase;
 window.loadCategoriesFromFirebase = loadCategoriesFromFirebase;
+
+// Marcar que Firebase está listo
+window.firebaseModuleReady = true;
+console.log('✅ Funciones Firebase expuestas a window');
 

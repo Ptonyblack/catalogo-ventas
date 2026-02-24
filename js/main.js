@@ -11,27 +11,28 @@ let phoneNumber = '5351234567'; // Cambiar por el número de WhatsApp
 
 async function loadProducts() {
   try {
-    // Cargar desde Firebase
-    const fbProducts = await loadProductsFromFirebase();
-    const fbCategories = await loadCategoriesFromFirebase();
+    // Cargar desde Firebase (esperar a que estén disponibles)
+    const fbProducts = window.loadProductsFromFirebase ? await window.loadProductsFromFirebase() : null;
+    const fbCategories = window.loadCategoriesFromFirebase ? await window.loadCategoriesFromFirebase() : null;
     
     // USAR FIREBASE COMO FUENTE PRINCIPAL
-    if (window.firebaseActive) {
+    if (window.firebaseActive && (fbProducts || fbCategories)) {
       allProducts = fbProducts || [];
       categories = fbCategories || [];
       
       if (fbProducts && fbProducts.length > 0) {
         console.log('✅ Productos cargados de Firebase:', fbProducts.length);
       } else {
-        console.log('ℹ️ No hay productos en Firebase + base de datos');
+        console.log('ℹ️ No hay productos en Firebase, usando productos locales');
       }
     } else {
-      // Fallback: Solo si Firebase NO está activo
+      // Fallback: Cargar datos locales
+      console.log('⚠️ Cargando datos locales (fallback)');
       const response = await fetch('data/products.json');
       const data = await response.json();
       allProducts = data.products || [];
       categories = data.categories || [];
-      console.log('⚠️ Firebase no activo, usando datos locales');
+      console.log('✅ Datos locales cargados:', allProducts.length, 'productos');
     }
     
     filteredProducts = allProducts;
@@ -229,7 +230,10 @@ document.addEventListener('firebaseReady', function() {
     console.log('✅ Número de WhatsApp cargado:', phoneNumber);
   }
   
-  loadProducts();
+  // Asegurarse de que las funciones están disponibles
+  setTimeout(() => {
+    loadProducts();
+  }, 100);
 });
 
 // FALLBACK: Si Firebase no se inicializa en 3 segundos, cargar de todas formas
