@@ -16,6 +16,8 @@ async function initializeFirebase() {
     firebaseActive = false;
     // Exponer firebaseActive INMEDIATAMENTE antes de cualquier evento
     window.firebaseActive = firebaseActive;
+    // Exponer funciones ANTES de disparar evento
+    exposeFirebaseFunctions();
     dispatchFirebaseReady();
     return;
   }
@@ -47,8 +49,22 @@ async function initializeFirebase() {
   window.firebaseActive = firebaseActive;
   console.log('✅ firebaseActive expuesto:', window.firebaseActive);
   
+  // Exponer funciones ANTES de disparar evento
+  exposeFirebaseFunctions();
+  
   // Emitir evento para notificar que Firebase está listo
   dispatchFirebaseReady();
+}
+
+function exposeFirebaseFunctions() {
+  // Exponer funciones directamente
+  window.initializeFirebase = initializeFirebase;
+  window.uploadProductImage = uploadProductImage;
+  window.saveProductsToFirebase = saveProductsToFirebase;
+  window.loadProductsFromFirebase = loadProductsFromFirebase;
+  window.saveCategoriesFirebase = saveCategoriesFirebase;
+  window.loadCategoriesFromFirebase = loadCategoriesFromFirebase;
+  console.log('✅ Funciones Firebase expuestas a window');
 }
 
 function dispatchFirebaseReady() {
